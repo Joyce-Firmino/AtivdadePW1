@@ -79,5 +79,14 @@ app.post('/tecnologias', retornaUsuarioExistente, (req, res) => {
     return res.status(201).json({novaTecnologia})
 })
 
+//Listando tecnologias de um determinado usuario
+app.get('/tecnologias', retornaUsuarioExistente,(req, res) => {
+    const {userExpr} = req; 
+    try {
+        res.status(200).json(userExpr.tecnologias)
+    } catch (error) {
+        res.status(404).json({error: "Usuario não existe"})
+    }
+})
 
 app.listen(3332);
