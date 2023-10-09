@@ -89,4 +89,30 @@ app.get('/tecnologias', retornaUsuarioExistente,(req, res) => {
     }
 })
 
+//Atualizando uma tecnologia de um determinado usuario
+app.put('/tecnologias/:id', retornaUsuarioExistente,(req, res) => {
+    const {titulo, dtPrazoFinal} = req.body as Tecnologia
+    const {id} = req.params
+    const tecnologiaEncontrada: Tecnologia = req.userExpr.tecnologias.find(tec =>tec.id === id );
+    if(tecnologiaEncontrada){
+        tecnologiaEncontrada.titulo = titulo;
+        tecnologiaEncontrada.dtPrazoFinal= dtPrazoFinal;
+        return res.status(201).json(tecnologiaEncontrada)
+    }
+    return res.status(404).json({error: "Tecnologia não encontrada"}) 
+})
+
+// Marcando uma tecnologia como estudada
+app.patch('/tecnologias/:id/estudada', retornaUsuarioExistente,(req, res) => {
+    const {titulo, dtPrazoFinal} = req.body as Tecnologia
+    const {id} = req.params;
+    const estudada = true;
+    const tecnologiaEstudada: Tecnologia = req.userExpr.tecnologias.find(tec =>tec.id === id );
+    if(tecnologiaEstudada){
+        tecnologiaEstudada.marcarEstudado= estudada;
+        return res.status(201).json(tecnologiaEstudada)
+    }
+    return res.status(404).json({error: "Tecnologia não encontrada"}) 
+});
+
 app.listen(3332);
