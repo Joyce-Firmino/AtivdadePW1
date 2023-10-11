@@ -1,6 +1,7 @@
 import express,{Request, Response, NextFunction} from 'express';
 import { UUID } from 'crypto';
 import {v4 as uuidv4} from 'uuid';
+import { log } from 'console';
 
 
 const { type } = require('os');
@@ -31,16 +32,10 @@ const arrayUsuarios= [] as Usuario[];
 function retornaUsuarioExistente(req: Request, res: Response, next: NextFunction){
     const {usernome} = req.headers;
     const userEncontrado= arrayUsuarios.find((user) => user.usernome === usernome);
-    // if(!userEncontrado){
-    //     return res.status(400).json({error: "Usuario não existe!"})
-    // }
-    try {
-        req.userExpr = userEncontrado as Usuario;
-
-    } catch (error) {
+    if(!userEncontrado){
         return res.status(400).json({error: "Usuario não existe!"})
     }
-    // req.userExpr = userEncontrado
+    req.userExpr = userEncontrado
     return next();
 }
 
@@ -85,7 +80,7 @@ app.get('/tecnologias', retornaUsuarioExistente,(req, res) => {
     try {
         res.status(200).json(userExpr.tecnologias)
     } catch (error) {
-        res.status(404).json({error: "Usuario não existe"})
+        res.status(404).json({error: "Tecnologia não existe"})
     }
 })
 
@@ -104,8 +99,7 @@ app.put('/tecnologias/:id', retornaUsuarioExistente,(req, res) => {
 
 // Marcando uma tecnologia como estudada
 app.patch('/tecnologias/:id/estudada', retornaUsuarioExistente,(req, res) => {
-    const {titulo, dtPrazoFinal} = req.body as Tecnologia
-    const {id} = req.params;
+    const {id} = req.params;        
     const estudada = true;
     const tecnologiaEstudada: Tecnologia = req.userExpr.tecnologias.find(tec =>tec.id === id );
     if(tecnologiaEstudada){
@@ -115,4 +109,18 @@ app.patch('/tecnologias/:id/estudada', retornaUsuarioExistente,(req, res) => {
     return res.status(404).json({error: "Tecnologia não encontrada"}) 
 });
 
+//Deletando uma tecnologia
+app.delete('/tecnologias/:idParaExcluir', retornaUsuarioExistente, (req,res) => {
+    const { idParaExcluir } = req.params;     
+    const {userExpr} = req;     
+    if (userExpr) { // Encontra a tecnologia no array 'tecnologias' do usuário que tenha o mesmo valor de 'idParaExcluir' no seu campo id
+      const indiceParaExcluir = userExpr.tecnologias.findIndex(tec => tec.id === idParaExcluir);   
+      if (indiceParaExcluir !== -1) {// 'splice' para remover a tecnologia do array 'tecnologias' do usuário
+        userExpr.tecnologias.splice(indiceParaExcluir, 1);
+  
+        return res.status(201).json({ message: 'Tecnologia deletada com sucesso!' });
+      } 
+      return res.status(404).json({ error: 'Tecnologia não encontrada' });
+    }     
+})
 app.listen(3332);
